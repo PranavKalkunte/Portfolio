@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/@glorious/demo/dist/gdemo.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css">
+  </head>
+  <body>
+    
+
+    <div id="container"></div>
+   
+    <script src="https://unpkg.com/@glorious/demo/dist/gdemo.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs"></script>
+    
+    <script>
+
+      // Constructor receives a selector that indicates
+    // where to inject the demonstration in your page.
+    const demo = new GDemo('#container');
+
+const code = `
+#Choosing stocks to exemplify:
+stocks = ['AMZN','IBM','TSLA','AAL','UAL','DAL',
+          'MRK','MRNA','PFE','GS','BAC','ECL','WFC','CVX',
+          'BK', 'CDW', 'CTSH','MCO','NOC','AAPL','ABT','AEE',
+          'FANG','ALK','ADI','AIZ','AKAM','AMD','AOS',
+          'BA','AVY','CBRE','DHI','DVA']
+
+#Narrowig down scores to above stocks only:
+stock_scores = scores.loc[stocks]
+
+#Getting closing stock price data: Yahoo Finance
+data = yf.Tickers(stocks) 
+port = data.history(period='1d', start='2019-01-01', end='2022-01-01').Close
+tempHeaders = stocks.copy() 
+tempHeaders.insert(0, "Date")
+print(tabulate(port.head(), headers = tempHeaders))
+
+#Annual Returns + Cov Matrix:
+year_ret = port.resample('Y').last().pct_change().mean()   #Average Yearly 
+cov = port.pct_change().cov()
+
+#Joining returns + volatility with ESG scores:
+stock_scores['Returns'] = np.round(year_ret*100, 0)
+stock_scores['Volatility'] = np.round(port.pct_change().std()*np.sqrt(252)*100, 2) 
+print(tabulate(stock_scores, headers = ["Ticker", "Environmental", "Social", "Governance", "Total", "Returns", "Volatility"]))
+
+#Get market cap weights:
+import pandas_datareader as web           
+mcs = web.get_quote_yahoo(stocks)['marketCap'].values  
+mcs_w = mcs / mcs.sum() 
+mcs_w
+
+M_W = pd.DataFrame(mcs_w)
+print(tabulate(M_W, headers = ["Market Cap"], showindex=stocks))
+`
+const response = `
+[*********************100%***********************]  34 of 34 completed
+Date                    AMZN      IBM     TSLA      AAL      UAL      DAL    MRK     MRNA    PFE       GS      BAC      ECL      WFC      CVX       BK    CDW     CTSH      MCO  
+    NOC     AAPL      ABT    AEE     FANG      ALK      ADI      AIZ     AKAM      AMD    AOS       BA      AVY     CBRE    DHI      DVA
+-------------------  -------  -------  -------  -------  -------  -------  -----  -------  -----  -------  -------  -------  -------  -------  -------  -----  -------  -------  
+-------  -------  -------  -----  -------  -------  -------  -------  -------  -------  -----  -------  -------  -------  -----  -------
+2019-01-02 00:00:00  31.9632  38.1051  65.1866  79.9808  57.6524  83.8253  59.01  59.8601  18.83  76.9565  40.3468  84.4126  314.645  22.9211  42.3605  39.93  75.8916  60.0485  
+93.0395  48.4309  33.7761  51.73  139.519  84.882   158.627  90.5885  136.321  64.0458  15.33  231.702  35.4304  20.6747  84.18  41.8187
+2019-01-03 00:00:00  29.5817  34.3096  62.1102  75.1495  57.7976  82.4856  57.7   56.5518  17.05  75.014   39.3722  81.6736  302.101  22.5538  41.5222  37.89  73.9361  58.1544  
+91.2575  44.0993  33.6421  50.98  136.265  85.72    156.304  88.7801  131.801  62.7325  15.5   225.636  34.4392  20.024   80     41.4891
+2019-01-04 00:00:00  31.5302  35.7742  63.8829  76.974   58.6143  84.1509  59.38  58.3811  19     78.7695  40.9501  84.8441  317.823  23.4904  42.7261  39.45  74.6551  60.629   
+93.1488  46.2071  35.1935  54     141.204  89.0807  161.412  92.2476  138.673  64.622   16.96  233.141  35.2256  21.1793  82.68  42.7185
+2019-01-07 00:00:00  32.4257  35.6946  64.8396  77.4581  57.9428  84.4859  61.24  58.4978  20.57  81.4755  41.6833  85.2474  318.823  23.4721  42.628   40.01  74.3579  60.5339  
+94.3591  46.2651  35.8159  54.37  141.618  91.4876  162.306  92.9002  139.186  63.9103  16.27  234.956  35.414   22.3307  83.23  42.4423
+2019-01-08 00:00:00  31.9041  36.3751  64.0611  79.3478  58.8593  84.5882  62.45  59.0135  20.75  82.829   42.7043  86.1198  330.892  23.4262  42.4675  41.32  76.9461  61.2191  
+93.9472  45.8977  35.6723  54.06  143.341  93.5557  161.707  94.2212  141.209  64.3848  16.95  236.018  35.5779  22.3567  82.38  42.3532
+Ticker      Environmental    Social    Governance    Total    Returns    Volatility
+--------  ---------------  --------  ------------  -------  ---------  ------------
+AMZN                  0         8.1           1.1     3.07         39         29.38
+IBM                   7.6       9.5           3.9     7             8         29.52
+TSLA                  6.4       7             1.3     4.9         397         66.99
+AAL                   0         9             4.3     4.43        -15         69.15
+UAL                   0         1.5           4.2     1.9         -25         66.48
+DAL                   0         8.1           6.7     4.93        -17         52.94
+MRK                   4.6       9.8           9.6     8            -3         25.19
+MRNA                  6.1       0.8           1.8     2.9         289         82.62
+PFE                   3.7       7             8.4     6.37         35         27.83
+GS                    5.1       8.1           9.3     7.5          33         36.12
+BAC                   3.7       8.1           9.9     7.23         19         39.27
+ECL                   7.9       9             8.7     8.53         11         31.93
+WFC                   9.1       9.5           8.9     9.17         10         41.99
+CVX                   0.1       8.1           4.3     4.17         10         39.45
+BK                    5.3       9            10       8.1          14         34.37
+CDW                   7.3       9             9.9     8.73         25         35.05
+CTSH                  6.6       8.1           9.6     8.1          22         33.5
+MCO                   6.3       9             8.9     8.07         29         33.59
+NOC                   6.3       9             9.9     8.4          10         28.56
+AAPL                  0.8       7             0.6     2.8          58         34.12
+ABT                   4.5       9.5           9.9     7.97         29         28.08
+AEE                   3.9       0.2           4.6     2.9          11         28.17
+FANG                  2.8       1.5           4.7     3            41         70.59
+ALK                   4.8       4             2.5     3.77        -11         52.47
+ADI                   5.8       9             2.8     5.87         24         36.86
+AIZ                   6.6       8.1           4.2     6.3          11         32.17
+AKAM                  5.9       8.1           6.9     6.97         17         29.21
+AMD                   6.5       7             4.9     6.13         78         53.03
+AOS                   6.9       0.2           6.5     4.53         38         30.89
+BA                    4.4       9             5.6     6.33        -20         57.1
+AVY                   5.9       8.1           6.7     6.9          31         33.74
+CBRE                  7.2       9.5           4       6.9          38         41.46
+DHI                   7.7       0.2           1.4     3.1          45         41.79
+DVA                   5.4       0.8           5       3.73         27         34.14
+        Market Cap
+----  ------------
+AMZN   0.153826
+IBM    0.0191979
+TSLA   0.0925778
+AAL    0.00144674
+UAL    0.00218674
+DAL    0.00339953
+MRK    0.0371565
+MRNA   0.00983962
+PFE    0.0399729
+GS     0.019513
+BAC    0.0460988
+ECL    0.00663369
+WFC    0.0271064
+CVX    0.0539388
+BK     0.0053834
+CDW    0.00373399
+CTSH   0.00449156
+MCO    0.00850638
+NOC    0.0113447
+AAPL   0.35627
+ABT    0.0271511
+AEE    0.00322245
+FANG   0.00432733
+ALK    0.000896584
+ADI    0.0126239
+AIZ    0.00101286
+AKAM   0.00219595
+AMD    0.0174566
+AOS    0.00137134
+BA     0.0158251
+AVY    0.00222677
+CBRE   0.00372605
+DHI    0.00436967
+DVA    0.000969155
+`
+const highlightedCode = Prism.highlight(
+  code,
+  Prism.languages.javascript,
+  'javascript'
+);
+
+demo
+  .openApp('editor', {minHeight: '350px', windowTitle: 'demo.js', initialContent : highlightedCode})
+  .write( '', {onCompleteDelay: 5000})
+  .openApp('terminal', {minHeight: '350px', promptString: '$'})
+  .command('node ./part2', {onCompleteDelay: 5000})
+  .respond(response)
+  .command('')
+  .end();
+
+    </script>
+  </body>
+</html>

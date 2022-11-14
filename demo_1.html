@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/@glorious/demo/dist/gdemo.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css">
+  </head>
+  <body>
+    
+
+    <div id="container"></div>
+   
+    <script src="https://unpkg.com/@glorious/demo/dist/gdemo.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs"></script>
+    
+    <script>
+
+      // Constructor receives a selector that indicates
+    // where to inject the demonstration in your page.
+    const demo = new GDemo('#container');
+
+const code = `
+#Necessary packages:
+import numpy as np
+import pandas as pd
+import yfinance as yf             #Stock price data
+import pandas_datareader as web   #Market cap data 
+import cvxpy as cp                #Optimization 
+from statsmodels.stats.correlation_tools import cov_nearest  #adjusting BL model
+from tabulate import tabulate
+
+#Get ESG scores:
+scores_path = 'D:/code/ESG-asset-allocation-main/ESG-asset-allocation-main/scores.csv'   
+scores = pd.read_csv(scores_path)     #Read csv file
+print(tabulate(scores.head(), headers = ["Ticker", "Environmental", "Social", "Governance", "Total"]))  #Show data portion of data
+
+#Make stock symbols the index:
+scores.index = scores.Ticker.str.split().str[0] 
+scores.drop(scores.columns[0], axis=1, inplace=True)  #Drop Ticker column
+print(tabulate(scores.head(), headers = ["Ticker", "Environmental", "Social", "Governance", "Total"]))
+`
+const response = `
+Ticker            Environmental    Social    Governance    Total
+--  --------------  ---------------  --------  ------------  -------
+ 0  A UN Equity                 7.1       8.1           6.1     7.1
+ 1  AAL UW Equity               0         9             4.3     4.43
+ 2  AAP UN Equity               6.4       4             5       5.13
+ 3  AAPL UW Equity              0.8       7             0.6     2.8
+ 4  ABBV UN Equity              5         8.1           8.1     7.07
+Ticker      Environmental    Social    Governance    Total
+--------  ---------------  --------  ------------  -------
+A                     7.1       8.1           6.1     7.1
+AAL                   0         9             4.3     4.43
+AAP                   6.4       4             5       5.13
+AAPL                  0.8       7             0.6     2.8
+ABBV                  5         8.1           8.1     7.07
+`
+const highlightedCode = Prism.highlight(
+  code,
+  Prism.languages.javascript,
+  'javascript'
+);
+
+demo
+  .openApp('editor', {minHeight: '350px', windowTitle: 'demo.js', initialContent : highlightedCode})
+  .write( '', {onCompleteDelay: 5000})
+  .openApp('terminal', {minHeight: '350px', promptString: '$'})
+  .command('node ./part1', {onCompleteDelay: 5000})
+  .respond(response)
+  .command('')
+  .end();
+
+    </script>
+  </body>
+</html>
